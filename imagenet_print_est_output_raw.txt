@@ -1,0 +1,21 @@
+$ python print_est.py --dataset imagenetoutdist --target src_validation
+DATASET: imagenetoutdist
+LOG_PREFIX: eval_results
+METHOD: ['TENT']
+SEED: [0, 1, 2]
+OUTDIST: ['original']
+DIST: 1
+RESET: 
+CONTINUAL: False
+
+SEED:0, OUTDIST: original
+,gaussian_noise,shot_noise,impulse_noise,defocus_blur,glass_blur,motion_blur,zoom_blur,snow,frost,fog,brightness,contrast,elastic_transform,pixelate,jpeg_compression
+TENT_original(eval_results_0_dist1),54.696,53.4,54.373,55.765,54.833,43.948,33.696,38.347,39.867,26.098,11.239,54.301,28.773,23.042,29.355
+
+SEED:1, OUTDIST: original
+,gaussian_noise,shot_noise,impulse_noise,defocus_blur,glass_blur,motion_blur,zoom_blur,snow,frost,fog,brightness,contrast,elastic_transform,pixelate,jpeg_compression
+TENT_original(eval_results_1_dist1),53.339,51.674,52.87,54.469,53.409,42.802,32.546,36.809,38.424,24.847,10.114,53.646,27.736,22.353,28.084
+
+SEED:2, OUTDIST: original
+,gaussian_noise,shot_noise,impulse_noise,defocus_blur,glass_blur,motion_blur,zoom_blur,snow,frost,fog,brightness,contrast,elastic_transform,pixelate,jpeg_compression
+TENT_original(eval_results_2_dist1),52.584,51.298,52.599,53.934,52.749,42.116,32.104,36.564,38.026,24.26,10.041,52.742,27.091,21.646,28.182

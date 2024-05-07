@@ -1,0 +1,21 @@
+$ python print_est.py --dataset esoutdist --target src_validation
+DATASET: esoutdist
+LOG_PREFIX: eval_results
+METHOD: ['TENT']
+SEED: [0, 1, 2]
+OUTDIST: ['original']
+DIST: 1
+RESET: 
+CONTINUAL: False
+
+SEED:0, OUTDIST: original
+,l1_param_1,l1_param_2,l1_param_3,l1_param_4,l1_param_5,l5_param_1,l5_param_2,l5_param_3,l5_param_4,l5_param_5
+TENT_original(eval_results_0_dist1),0.754,0.717,0.538,0.732,0.551,0.588,0.688,0.642,0.575,0.575
+
+SEED:1, OUTDIST: original
+,l1_param_1,l1_param_2,l1_param_3,l1_param_4,l1_param_5,l5_param_1,l5_param_2,l5_param_3,l5_param_4,l5_param_5
+TENT_original(eval_results_1_dist1),0.519,0.617,0.577,0.688,0.628,0.499,0.57,0.468,0.577,0.621
+
+SEED:2, OUTDIST: original
+,l1_param_1,l1_param_2,l1_param_3,l1_param_4,l1_param_5,l5_param_1,l5_param_2,l5_param_3,l5_param_4,l5_param_5
+TENT_original(eval_results_2_dist1),0.849,0.612,0.778,0.792,0.777,0.889,0.872,0.953,1.007,0.785
