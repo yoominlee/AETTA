@@ -11,6 +11,7 @@ from .OutDistDataset import OutDistDataset
 from .IMAGENETADataset import ImageNetADataset
 from .IMAGENETRDataset import ImageNetRDataset
 from .ESDataset import ESDataset
+from .TinyDataset import TinyDataset
 
 import os
 import pickle
@@ -156,7 +157,7 @@ def domain_data_loader(dataset, domains, file_path, batch_size, train_max_rows=n
     print('Domains:{}'.format(processed_domains))
 
     # if dataset in ['imagenetoutdist', 'cifar10outdist', 'cifar100outdist']:
-    if dataset in ['imagenetoutdist', 'cifar10outdist', 'cifar100outdist','esoutdist']:
+    if dataset in ['imagenetoutdist', 'cifar10outdist', 'cifar100outdist','esoutdist','tinyoutdist']:
 
         cond = processed_domains
         filename = f"{dataset}_{conf.args.outdist}_{conf.args.outdist_size}_{conf.args.outdist_class}_{conf.args.seed}"
@@ -249,6 +250,21 @@ def domain_data_loader(dataset, domains, file_path, batch_size, train_max_rows=n
         transform = 'src' if is_src else 'val'
 
         file_path = os.path.join(file_path, 'es', cond[0], str(5))
+        loaded_data = load_cache(dataset, processed_domains, file_path, transform=transform)
+
+        if not loaded_data:
+            loaded_data = ESDataset(file=file_path, domain=cond[0], max_source=num_source, transform=transform)
+            save_cache(loaded_data, dataset, processed_domains, file_path, transform=transform)
+
+        train_data = loaded_data
+        entire_datasets.append(train_data)
+
+    elif dataset in ['tiny']:
+
+        cond = processed_domains
+        transform = 'src' if is_src else 'val'
+
+        file_path = os.path.join(file_path, 'tiny', cond[0], str(5))
         loaded_data = load_cache(dataset, processed_domains, file_path, transform=transform)
 
         if not loaded_data:

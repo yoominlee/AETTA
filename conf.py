@@ -427,6 +427,41 @@ IMAGENET_ES = {
 
 } 
 
+
+
+TINY = {
+    # pretrain 된것 그냥 원본 이미지 넣어본 결과위해서 clean train data. 
+    'name': 'tiny',
+
+    "learning_rate": 5e-3,
+    # "epochs": 20,
+    "batch_size": 256,
+    "patience": 2,
+    "factor": 0.5,
+    "threshold": 1e-2,
+
+    # 'DATA_TRANSFORMS': data_transforms,
+    # 'num_workers': {'train' : 8, 'val'   : 8,'test'  : 8},
+    'num_class': 200,
+    # 'CFG': cfg
+
+    'weight_decay': 0,
+
+    'momentum': 0.9, #이 파알에서 데이터셋들 전부 모멘텀 0.9로 설정
+
+
+    'file_path': './dataset/Tiny',
+    
+    'domains': ["clean"],
+           
+    ##############   <<----------    이부분 수정!!
+    'src_domains': ["original"],
+    'tgt_domains': ["clean"],
+    'indices_in_1k' : None
+
+
+} 
+
 # copy_xxxIMAGENET_C = {
 #     # referred to for hyperparams: https://github.com/Lornatang/ResNet-PyTorch/blob/9e529757ce0607aafeae2ddd97142201b3d4cadd/examples/imagenet/main.py
 #     'name': 'imagenet',

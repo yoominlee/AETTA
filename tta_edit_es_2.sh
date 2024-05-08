@@ -3,8 +3,8 @@
 SRC_PREFIX="reproduce_src"
 LOG_PREFIX="eval_results"
 
-BASE_DATASETS=("esoutdist") # cifar10outdist cifar100outdist imagenetoutdist
-METHODS=("TENT" "EATA" "SAR" "SoTTA" "RoTTA" "CoTTA") # "TENT" "EATA" "SAR" "SoTTA" "RoTTA" "CoTTA"
+BASE_DATASETS=("tinyoutdist") # cifar10outdist cifar100outdist imagenetoutdist
+METHODS=("TENT") # "EATA" "SAR" "SoTTA" "RoTTA" "CoTTA") # "TENT" "EATA" "SAR" "SoTTA" "RoTTA" "CoTTA"
 SEEDS=(0 1 2)
 # PREFIXES=("--acc_est_method aetta softmax_score gde src_validation adv_perturb")
 PREFIXES=("--acc_est_method src_validation")
@@ -95,6 +95,9 @@ test_time_adaptation() {
           elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ]; then
             MODEL="resnet18_es_pretrained"
             CP_base="log/es/Src/tgt_test/"${SRC_PREFIX}
+          elif [ "${DATASET}" = "tiny" ] || [ "${DATASET}" = "esoutdist" ]; then
+            MODEL="resnet18_es_pretrained"
+            CP_base="log/tiny/Src/tgt_test/"${SRC_PREFIX}
           fi
 
           for SEED in "${SEEDS[@]}"; do #multiple seeds
@@ -133,7 +136,7 @@ test_time_adaptation() {
                 high_threshold=0.66
               elif [ "${DATASET}" = "imagenet" ] || [ "${DATASET}" = "imagenetoutdist" ]; then
                 high_threshold=0.33
-              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ]; then
+              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ] || [ "${DATASET}" = "tinyoutdist" ]; then
                 high_threshold=0.33
               fi
               #### Train with BN
@@ -183,7 +186,7 @@ test_time_adaptation() {
               EPOCH=1
               if [ "${DATASET}" = "imagenet" ] || [ "${DATASET}" = "imagenetoutdist" ]; then
                 lr=0.00025 #referred to the paper
-              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ]; then
+              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ] || [ "${DATASET}" = "tinyoutdist" ]; then
                 lr=0.00025 #위와동일
               else
                 lr=0.001
@@ -214,7 +217,7 @@ test_time_adaptation() {
                 aug_threshold=0.72 #value reported from the official code
               elif [ "${DATASET}" = "imagenet" ] || [ "${DATASET}" = "imagenetoutdist" ]; then
                 aug_threshold=0.1 #value reported from the official code
-              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ]; then
+              elif [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ] || [ "${DATASET}" = "tinyoutdist" ]; then
                 aug_threshold=0.1 #value reported from the official code
               fi
 
@@ -268,7 +271,7 @@ test_time_adaptation() {
                 e_margin=1.84207 # 0.4*ln(100)
                 d_margin=0.4
                 fisher_alpha=1
-              elif [ "${DATASET}" = "imagenet" ] || [ "${DATASET}" = "imagenetoutdist" ] || [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ]; then
+              elif [ "${DATASET}" = "imagenet" ] || [ "${DATASET}" = "imagenetoutdist" ] || [ "${DATASET}" = "es" ] || [ "${DATASET}" = "esoutdist" ] || [ "${DATASET}" = "tinyoutdist" ]; then
                 lr=0.00025
                 e_margin=2.76310 # 0.4*ln(1000)
                 d_margin=0.05
