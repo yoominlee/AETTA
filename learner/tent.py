@@ -34,7 +34,7 @@ class TENT(DNN):
                 module.weight.requires_grad_(True)
                 module.bias.requires_grad_(True)
 
-        if conf.args.dataset in ['imagenet', 'imagenetoutdist', 'es', 'esoutdist']:  # TENT use SGD for imagenet
+        if conf.args.dataset in ['imagenet', 'imagenetoutdist', 'es', 'esoutdist', 'tent']:  # TENT use SGD for imagenet
             self.optimizer = optim.SGD(self.net.parameters(), lr=conf.args.opt['learning_rate'],
                                        weight_decay=conf.args.opt['weight_decay'])
 
@@ -55,7 +55,20 @@ class TENT(DNN):
 
         entropy_loss = HLoss()
 
-        preds_of_data = self.net(feats) if conf.args.opt['indices_in_1k'] == None else self.net(feats)[:, conf.args.opt['indices_in_1k']]
+        # preds_of_data = self.net(feats) if conf.args.opt['indices_in_1k'] == None else self.net(feats)[:, conf.args.opt['indices_in_1k']]
+        #윗줄과 동일한 내용 print 찍어보려고 풀어씀
+        indices = conf.args.opt['indices_in_1k']
+
+        if indices is None:
+            # indices없으면 network의 full output 사용
+            preds_of_data = self.net(feats)
+            # print("FULL NET !!!") # tiny 확인해봤을 때, full net 사용 
+        else:
+            # specify 되어있으면 selected output들만 fetch
+            all_preds = self.net(feats)
+            preds_of_data = all_preds[:, indices]
+            # print("SEL NET !!!")
+
 
         loss = entropy_loss(preds_of_data)
 

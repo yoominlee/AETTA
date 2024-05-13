@@ -9,6 +9,9 @@ _CIFAR100_STDDEV = [0.2673, 0.2564, 0.2762]
 _IMAGENET_MEAN = [0.485, 0.456, 0.406]
 _IMAGENET_STDDEV = [0.229, 0.224, 0.225]
 
+_ES_MEAN = [0.4802, 0.4481, 0.3975]
+_ES_STDDEV = [0.2302, 0.2265, 0.2262]
+
 class NormalizeLayer(torch.nn.Module):
     """Standardize the channels of a batch of images by subtracting the dataset mean
       and dividing by the dataset standard deviation.
@@ -37,8 +40,10 @@ def get_normalize_layer(dataset):
         return NormalizeLayer(_CIFAR100_MEAN, _CIFAR100_STDDEV)
     elif dataset in ['imagenet', 'imagenetoutdist', 'imagenetA', 'imagenetR']:
         return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
+    elif dataset in ['es','esoutdist']:
+        return NormalizeLayer(_ES_MEAN, _ES_STDDEV)
     else:
-        return None
+        raise NotImplementedError
 
 
 def get_normalize_std(dataset):
@@ -49,5 +54,7 @@ def get_normalize_std(dataset):
         return _CIFAR100_MEAN, _CIFAR100_STDDEV
     elif dataset in ['imagenet', 'imagenetoutdist', 'imagenetA', 'imagenetR']:
         return _IMAGENET_MEAN, _IMAGENET_STDDEV
+    elif dataset in ['es','esoutdist']:
+        return _ES_MEAN, _ES_STDDEV
     else:
-        return None
+        raise NotImplementedError

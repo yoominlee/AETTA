@@ -63,9 +63,11 @@ class DNN():
         
         if "pretrained" in conf.args.model:
             # pretrained = model_(pretrained=True)
+            print("----- conf.args.model -----")
+            print(conf.args.model)
             if conf.args.model == "resnet18_pretrained":
                 pretrained = model_(pretrained=True)
-                model = ResNetDropout18()
+                model = ResNetDropout18(num_classes=200)
                 model.load_state_dict(pretrained.state_dict())
             elif conf.args.model == "resnet50_pretrained":
                 pretrained = model_(pretrained=True)
@@ -73,7 +75,6 @@ class DNN():
                 model.load_state_dict(pretrained.state_dict())
             elif conf.args.model == "resnet18_es_pretrained":
                 pretrained = model_
-                # print("lllllllllllllllllllllll")
                 # print(model_)
                 model = ResNetDropout18(num_classes=200)
 
@@ -212,13 +213,19 @@ class DNN():
         file_path = conf.args.opt['file_path'] + "_target_train_set"
 
         self.target_train_set = load_cache(filename, cond, file_path, transform=None)
+        print("!!!!! TARGET DATA !!!!!")
+        print("file_path: ",file_path)                                      # file_path:  ./dataset/Tiny_target_train_set
+        print("conf.args.opt['file_path']: ",conf.args.opt['file_path'])    # conf.args.opt['file_path']:  ./dataset/Tiny
 
         if not self.target_train_set:
+            print("not self.target_train_set   -----   line 220 @ dnn.py")
             self.target_data_processing()
             save_cache(self.target_train_set, filename, cond, file_path, transform=None)
 
         if conf.args.method == 'Src':
+            print("conf.args.method == 'Src'   -----   line 224 @ dnn.py")
             if conf.args.dataset in ['cifar10', 'cifar100', 'cifar10outdist', 'cifar100outdist']:
+                print("conf.args.dataset in ['cifar10', 'cifar100', 'cifar10outdist', 'cifar100outdist']   -----   line 226 @ dnn.py")
                 self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
                                                                             T_max=conf.args.epoch *
                                                                                   len(self.source_dataloader['train']))
@@ -439,6 +446,13 @@ class DNN():
             # extract each from list of current_sample
             features, cl_labels, do_labels = current_samples
             feats, cls, dls = (torch.stack(features), torch.stack(cl_labels), torch.stack(do_labels))
+            # print("feats: ")
+            # print(feats)
+            print("self.eval_json['gt']: ",self.eval_json['gt'][0:4],"... ",len(self.eval_json['gt']))
+            print("self.eval_json['pred']: ",self.eval_json['pred'][0:4],"... ",len(self.eval_json['pred']))
+            print("self.eval_json['accuracy']: ",self.eval_json['accuracy'][0:4],"... ",len(self.eval_json['accuracy']))
+            # print("self.eval_json['confidence']: ",self.eval_json['confidence'])
+            # print("self.eval_json['current_accuracy']",self.eval_json['current_accuracy'])
             self.evaluation_online_body(epoch, current_samples, feats, cls, dls)
 
     def model_inference(self, feats, net=None, temp=1.0):
@@ -459,6 +473,14 @@ class DNN():
         return y_pred, y_conf, y_entropy, y_energy, None, y_pred_softmax, y_logit
         
     def evaluation_online_body(self, epoch, current_samples, feats, cls, dls):
+        # print("cls: ")
+        # print(cls)
+        # cls: 
+        # tensor([ 43, 126,  30, 144,   1, 184,  67, 130,  42, 190, 190,  13, 191, 175,
+        #         85,  25, 184,  94, 158,  27,  39,  16,  17,  76,  15,  59, 124, 184,
+        #         136,  47,   4,  16,  22,  13, 118, 120, 196, 178, 117,  15,  16, 125,
+        #         122,  76, 164,  48,  74, 179,  27,  11, 184, 101, 123,   6,  83,  17,
+        #         53,  49,  65, 164,  89, 133,  33, 173])
         # get lists from json
         true_cls_list = self.eval_json['gt']
         pred_cls_list = self.eval_json['pred']
@@ -467,6 +489,12 @@ class DNN():
         current_accuracy_list = self.eval_json['current_accuracy']
 
         num_reset = self.eval_json['num_reset']
+
+        print("true_cls_list: ",true_cls_list[0:4],"... ",len(true_cls_list))
+        print("pred_cls_list: ",pred_cls_list[0:4],"... ",len(pred_cls_list))
+        # print("accuracy_list: ",accuracy_list)
+        # print("conf_list: ",conf_list)
+        # print("current_accuracy_list: ",current_accuracy_list)
 
         cls = cls.to(torch.int32)  # bugfix when comparing outdist_index
         feats, cls, dls = feats.to(device), cls.to(device), dls.to(device)
@@ -496,12 +524,53 @@ class DNN():
         pred_cls_list += current_pred_cls_list
         conf_list += [float(c) for c in y_conf[cls != OUTDIST_CLASS_IDX].tolist()]
 
+        ###  ----------------------  !!! ACCURACY 연산 부분 !!!  ---------------------- 
+        # ORB-SLAM
+        # keypoint detector FAST
         if len(true_cls_list) > 0:
-            current_accuracy = sum(1 for gt, pred in zip(current_true_cls_list, current_pred_cls_list) if gt == pred)\
-                               / float(len(current_true_cls_list)) * 100
+            
+            ## original accuracy calculate part!!
+            # current_accuracy = sum(1 for gt, pred in zip(current_true_cls_list, current_pred_cls_list) if gt == pred)\
+            #                    / float(len(current_true_cls_list)) * 100
+
+            count = sum(1 for gt, pred in zip(current_true_cls_list, current_pred_cls_list)if gt == pred)
+            print("COUNT: ", count, " / ", "len(current_true_cls_list): ",len(current_true_cls_list))
+            current_accuracy = (count / float(len(current_true_cls_list)) )* 100
+            print("-> CURRENT ACC: ",current_accuracy)
+
+            
+            print("----------------------  !!! ACCURACY 연산 부분 !!!  ----------------------")
+            # print(current_true_cls_list)
+            print("Len current_true_cls_list:", len(current_true_cls_list)) # 64 --> 설정해둔 batch 단위
+            print("Len current_pred_cls_list:", len(current_pred_cls_list)) # 64
+
+            # tta.sh 파일에서 update_every_x, memory_size 값에 의해 위 길이 변함. 
+            
+            ############################## 윗 줄 풀어 쓴 것 ##############################
+            # Initialize a counter to keep track of correct predictions
+            # correct_predictions = 0
+
+            # Iterate over the zipped lists of ground truth labels and predicted labels
+            # for gt, pred in zip(current_true_cls_list, current_pred_cls_list):
+            #     if gt == pred:
+            #         correct_predictions += 1  # Increment the counter if the prediction is correct
+
+            # # Calculate the accuracy percentage
+            # total_samples = len(current_true_cls_list)  # Total number of samples
+            # if total_samples > 0:
+            #     accuracy_percentage = (correct_predictions / total_samples) * 100
+            # else:
+            #     accuracy_percentage = 0  # Avoid division by zero if there are no samples
+
+            # Now accuracy_percentage holds the accuracy value in percent
+
             current_accuracy_list.append(current_accuracy)
-            cumul_accuracy = sum(1 for gt, pred in zip(true_cls_list, pred_cls_list) if gt == pred)\
-                             / float(len(true_cls_list)) * 100
+            c_count = sum(1 for gt, pred in zip(true_cls_list, pred_cls_list) if gt == pred)
+            cumul_accuracy = (c_count / float(len(true_cls_list)) )* 100
+            print("c_count: ", c_count, " / ", "len(true_cls_list)", len(true_cls_list))
+            print("-> cumul_accuracy: ",cumul_accuracy)
+            print("Len true_cls_list: ",len(true_cls_list))
+            print("Len pred_cls_list: ",len(pred_cls_list))
             accuracy_list.append(cumul_accuracy)
 
             self.occurred_class = [0 for i in range(conf.args.opt['num_class'])]
@@ -527,9 +596,12 @@ class DNN():
     def dump_eval_online_result(self, is_train_offline=False):
         if is_train_offline:
             feats, cls, dls = self.target_train_set
+            print("--- TARGET TRAIN SET: ",self.target_train_set)
+            print("self: ")
+            print(self)
             batchsize = conf.args.opt['batch_size']
             for num_sample in range(0, len(feats), batchsize):
-                current_sample = feats[num_sample:num_sample+batchsize], cls[num_sample:num_sample+batchsize], dls[num_sample:num_sample+batchsize]
+                current_sample = feats[num_sample:num_sample+batchsize], cls[num_sample:num_sample+batchsize], dls[num_sample:num_sample+batchsize] ## !!
                 self.evaluation_online(num_sample + batchsize,
                                        [list(current_sample[0]), list(current_sample[1]), list(current_sample[2])])
 
@@ -934,6 +1006,9 @@ class DNN():
         src_accuracy = self.acc_est_json['src_validation']
         src_y_pred, _, _, _, _, _, _ = self.model_inference(src_feats)
         src_accuracy += [(src_y_pred == src_cls).float().mean().item()]
+        # print("----------------- src_val -----------------")
+        # print("src_y_pred: ", src_y_pred)
+        # print("src_cls: ", src_cls)
         self.acc_est_json['src_validation'] = src_accuracy
 
     def adv(self, feats):
